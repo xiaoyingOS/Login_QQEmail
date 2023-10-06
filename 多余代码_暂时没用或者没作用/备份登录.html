@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* background-color: rgb(2, 245, 128); */
+            font-family: Arial, sans-serif;
+            height: 100%;
+            width: 100%;
+        }
+
+        #loginForm {
+            position: relative;
+            top: 100px;
+            width: 400px;
+            height: 450px;
+            background-color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: auto; 
+        }
+
+        #qrCode {
+            /* position: absolute; */
+            top: 0;
+            left: 0;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #accountLoginForm {
+            display: none;
+        }
+
+        /* 设置最底下的背景 */
+        #bg {
+            position: absolute;
+            z-index: -900;
+            background-image: url("image.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            width: 100%;
+            /* height: 100%; */
+        }
+
+
+        /* 背景 */
+
+        .box {
+            position: absolute;
+            width: 100px;
+            height: 1px;
+            background-color: #000;
+            animation: jump-rotate 1.5s linear infinite;
+        }
+
+        @keyframes jump-rotate {
+            0% {
+                transform: translate(0, 0) rotate(0);
+            }
+
+            50% {
+                transform: translate(0, -20px) rotate(180deg);
+            }
+
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        .divClass {
+            width: 100px;
+            height: 1px;
+            background-color: black;
+            position: absolute;
+        }
+
+        .divClass::before,
+        .divClass::after {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: black;
+        }
+
+        .divClass::before {
+            top: -2.5px;
+            left: -2.5px;
+        }
+
+        .divClass::after {
+            bottom: -2.5px;
+            right: -2.5px;
+        }
+
+	</style>
+    </style>
+</head>
+
+<body>
+    
+    <img id="bg" src="./img/bg.gif" alt="背景">
+
+    <div id="loginForm">
+        <div>
+            <a id="qrCodeLoginLink" href="#">扫码登录</a>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+            <a id="accountLoginLink" href="#">账号登录</a>
+        </div>
+        <br>
+        <br>
+        <div>
+            <img id="qrCode" src="./img/smdl.jpg" alt="二维码" />
+            <form id="accountLoginForm">
+                <div>
+                    <input type="text" id="store" name="store" value="114514" style="border-radius: 20px;"
+                        placeholder="请输入门店" />
+                </div>
+                <br>
+                <div>
+                    <input type="text" id="account" name="account" value="114514" style="border-radius: 20px;"
+                        placeholder="请输入账号" />
+                </div>
+                <br>
+                <div>
+                    <input type="text" id="code" name="code" value="114514" style="border-radius: 20px;"
+                        placeholder="请输入验证码" />
+                </div>
+                <br>
+                <div>
+                    <input type="checkbox" id="remember" name="remember" />
+                    <label for="remember">保存密码</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="#" id="repasswd">找回密码</a>
+                </div>
+                <br>
+                <div>
+                    <button type="submit"
+                        style="width: 180px; height: 30px; border-radius: 20px; background-color: rgb(234, 255, 0);">登
+                        录</button>
+                </div>
+                <br>
+                <div id="error-message" style="color: blue; font-size: 20px;"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 动态背景 -->
+    <!-- ////////////////////////////// -->
+    <script>
+        const boxes = [];
+        const maxBoxes = 333;
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        function getRandomColor() {
+            const letters = "0123456789ABCDEF";
+            let color = "#";
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function createBox() {
+            if (boxes.length >= maxBoxes) return;
+
+            const box = document.createElement("div");
+            box.classList.add("divClass");//添加类名
+            box.classList.add("box");
+            box.style.zIndex = "-1";
+            box.style.backgroundColor = getRandomColor();
+            box.style.left = Math.random() * screenWidth + "px";
+            box.style.top = Math.random() * screenHeight + "px";
+            document.body.appendChild(box);
+            boxes.push(box);
+        }
+
+        function deleteBox() {
+            if (boxes.length > 0) {
+                const box = boxes.pop();
+                document.body.removeChild(box);
+            }
+        }
+
+        function moveBox(box) {
+            const left = parseFloat(box.style.left) || 0;
+            const width = parseFloat(box.style.width) || 0;
+            const newLeft = left - 3;
+
+            if (newLeft <= -width) {
+                box.style.left = screenWidth + "px";
+            } else {
+                box.style.left = newLeft + "px";
+            }
+        }
+
+        function detectCollision() {
+            for (let i = 0; i < boxes.length; i++) {
+                const box = boxes[i];
+                for (let j = i + 1; j < boxes.length; j++) {
+                    const otherBox = boxes[j];
+                    const boxRect = box.getBoundingClientRect();
+                    const otherBoxRect = otherBox.getBoundingClientRect();
+                    if (
+                        boxRect.left < otherBoxRect.right &&
+                        boxRect.right > otherBoxRect.left &&
+                        boxRect.top < otherBoxRect.bottom &&
+                        boxRect.bottom > otherBoxRect.top
+                    ) {
+                        document.body.removeChild(otherBox);
+                        boxes.splice(j, 1);
+                        if (boxes.indexOf(box) >= 0) {
+                            document.body.removeChild(box);
+                            boxes.splice(i, 1);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        function animateBoxes(timestamp) {
+            const delta = timestamp - lastTimestamp;
+            if (delta >= 500) {
+                createBox();
+                lastTimestamp = timestamp;
+            }
+
+            for (const box of boxes) {
+                moveBox(box);
+            }
+
+            detectCollision();
+        }
+
+        let lastTimestamp = 0;
+        function animate(timestamp) {
+            animateBoxes(timestamp);
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "+") {
+                if (boxes.length < maxBoxes) {
+                    createBox();
+                }
+            } else if (event.key === "-") {
+                deleteBox();
+            }
+        });
+
+    </script>
+    <!--  -->
+    <script>
+        const qrCodeLoginLink = document.getElementById('qrCodeLoginLink');
+        const accountLoginLink = document.getElementById('accountLoginLink');
+        const qrCode = document.getElementById('qrCode');
+        const accountLoginForm = document.getElementById('accountLoginForm');
+        const errorDiv = document.getElementById("error-message");
+        const repasswd = document.getElementById("repasswd");
+
+
+        // 点击扫码登录链接时，显示二维码并隐藏账号登录表单
+        qrCodeLoginLink.addEventListener('click', () => {
+            qrCode.style.display = 'block';
+            accountLoginForm.style.display = 'none';
+        });
+
+        // 点击账号登录链接时，隐藏二维码并显示账号登录表单
+        accountLoginLink.addEventListener('click', () => {
+            qrCode.style.display = 'none';
+            accountLoginForm.style.display = 'block';
+        });
+
+        //点击找回密码，提示默认密码为 114514
+        repasswd.addEventListener('click', () => {
+            errorDiv.innerHTML = ">>>全为 114514<<<";
+        });
+
+        // 当提交账号登录表单时，检查门店、账号和验证码是否正确
+        accountLoginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const storeInput = accountLoginForm.elements.store;
+            const accountInput = accountLoginForm.elements.account;
+            const codeInput = accountLoginForm.elements.code;
+
+            if (storeInput.value === '114514' && accountInput.value === '114514' && codeInput.value === '114514') {
+
+                // alert('登录成功！');
+                window.location.href = './logined.html';
+            } else {
+                //   alert('密码不正确！');
+                errorDiv.textContent = ">>> 信息错误 <<<";
+
+            }
+        });
+    </script>
+</body>
+
+</html>

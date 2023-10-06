@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>123云盘直链生成</title>
+  <!-- 也可以下载axios到本地 -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    #chatbox {
+      width: 1313px;
+      height: 800px;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #f2f2f2;
+      overflow-y: scroll;
+    }
+
+    #chatbox p {
+      color: blue;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+
+    #inputbox {
+      width: 1000px;
+      margin: 20px auto;
+      display: flex;
+    }
+
+    #inputDiv {
+      width: 510px;
+      height: 0px;
+      margin-right: 15px;
+    }
+
+    textarea {
+      width: 510px;
+      height: 44px;
+      border: none;
+      outline: none;
+      resize: none;
+      border: 3px solid #ff0000;
+    }
+
+    #message {
+      color: #000000;
+      flex-grow: 1;
+      margin-right: 10px;
+      font-size: 18px;
+      background-color: rgb(255, 255, 255);
+      position: relative;
+      font-weight: bold;
+    }
+
+    #send-btn {
+      background-color: blue;
+      color: white;
+      font-size: 23px;
+      border: none;
+      padding: 13px;
+      cursor: pointer;
+      margin-right: 10px;
+      /* 设置右侧间距为 10 像素 */
+    }
+
+    #download-btn {
+      background-color: rgb(70, 185, 70);
+      color: white;
+      font-size: 23px;
+      border: none;
+      padding: 13px;
+      cursor: pointer;
+      margin-right: 10px;
+      /* 设置右侧间距为 10 像素 */
+    }
+
+
+    #stop-btn {
+      background-color: red;
+      color: white;
+      font-size: 23px;
+      border: none;
+      padding: 13px;
+      cursor: pointer;
+      margin-right: 10px;
+      /* 设置右侧间距为 10 像素 */
+    }
+
+    .button {
+      font-size: 16px;
+      font-weight: normal;
+      transition: transform 0.2s ease-out;
+    }
+
+    .button:hover>span {
+      animation: blink 1s infinite;
+    }
+
+    .button:hover {
+      transform: translateY(-3px);
+    }
+
+    @keyframes blink {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* 主题样式 */
+    #theme-btn {
+      border-radius: 100%;
+      background-image: linear-gradient(to right, black 50%, white 50%);
+    }
+
+    #zt1 {
+      font-weight: bold;
+    }
+
+    #zt2 {
+      font-weight: bold;
+    }
+
+    /*  */
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .box {
+      position: absolute;
+      width: 100px;
+      height: 1px;
+      background-color: #000;
+      animation: jump-rotate 1.5s linear infinite;
+    }
+
+    @keyframes jump-rotate {
+      0% {
+        transform: translate(0, 0) rotate(0);
+      }
+
+      50% {
+        transform: translate(0, -20px) rotate(180deg);
+      }
+
+      100% {
+        transform: translate(0, 0) rotate(360deg);
+      }
+    }
+
+    .divClass {
+      width: 100px;
+      height: 1px;
+      background-color: black;
+      position: absolute;
+    }
+
+    .divClass::before,
+    .divClass::after {
+      content: "";
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: black;
+    }
+
+    .divClass::before {
+      top: -2.5px;
+      left: -2.5px;
+    }
+
+    .divClass::after {
+      bottom: -2.5px;
+      right: -2.5px;
+    }
+
+    /*  */
+  </style>
+
+  <style>
+    .json-textbox {
+      white-space: pre-wrap;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="inputbox">
+    <!-- <input type="text" id="message" placeholder="Type your message here..."> -->
+    <div id="inputDiv"><textarea id="message" placeholder="你想对我说什么..."></textarea></div>
+    <button class="button" id="send-btn"><span>联系站长</span></button>
+    <button class="button" id="download-btn"><span>直链下载</span></button>
+    <button class="button" id="stop-btn"><span>Stop</span></button>
+    <button class="button" id="theme-btn"><span id="zt1" style="color: white;">主</span><span id="zt2">题</span></button>
+  </div>
+  <div class="json-textbox" id="chatbox"></div>
+  <!-- ////////////////////////////// -->
+  <script>
+    const boxes = [];
+    const maxBoxes = 333;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    function getRandomColor() {
+      const letters = "0123456789ABCDEF";
+      let color = "#";
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    function createBox() {
+      if (boxes.length >= maxBoxes) return;
+
+      const box = document.createElement("div");
+      box.classList.add("divClass");//添加类名
+      box.classList.add("box");
+      box.style.zIndex = "-1";
+      box.style.backgroundColor = getRandomColor();
+      box.style.left = Math.random() * screenWidth + "px";
+      box.style.top = Math.random() * screenHeight + "px";
+      document.body.appendChild(box);
+      boxes.push(box);
+    }
+
+    function deleteBox() {
+      if (boxes.length > 0) {
+        const box = boxes.pop();
+        document.body.removeChild(box);
+      }
+    }
+
+    function moveBox(box) {
+      const left = parseFloat(box.style.left) || 0;
+      const width = parseFloat(box.style.width) || 0;
+      const newLeft = left - 3;
+
+      if (newLeft <= -width) {
+        box.style.left = screenWidth + "px";
+      } else {
+        box.style.left = newLeft + "px";
+      }
+    }
+
+    function detectCollision() {
+      for (let i = 0; i < boxes.length; i++) {
+        const box = boxes[i];
+        for (let j = i + 1; j < boxes.length; j++) {
+          const otherBox = boxes[j];
+          const boxRect = box.getBoundingClientRect();
+          const otherBoxRect = otherBox.getBoundingClientRect();
+          if (
+            boxRect.left < otherBoxRect.right &&
+            boxRect.right > otherBoxRect.left &&
+            boxRect.top < otherBoxRect.bottom &&
+            boxRect.bottom > otherBoxRect.top
+          ) {
+            document.body.removeChild(otherBox);
+            boxes.splice(j, 1);
+            if (boxes.indexOf(box) >= 0) {
+              document.body.removeChild(box);
+              boxes.splice(i, 1);
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    function animateBoxes(timestamp) {
+      const delta = timestamp - lastTimestamp;
+      if (delta >= 500) {
+        createBox();
+        lastTimestamp = timestamp;
+      }
+
+      for (const box of boxes) {
+        moveBox(box);
+      }
+
+      detectCollision();
+    }
+
+    let lastTimestamp = 0;
+    function animate(timestamp) {
+      animateBoxes(timestamp);
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "+") {
+        if (boxes.length < maxBoxes) {
+          createBox();
+        }
+      } else if (event.key === "-") {
+        deleteBox();
+      }
+    });
+
+  </script>
+
+
+
+
+  <!-- ////////////// -->
+  <script>
+    const chatbox = document.getElementById("chatbox");
+    const messageInput = document.getElementById("message");
+    const sendBtn = document.getElementById("send-btn");
+    const downloadBtn = document.getElementById("download-btn");
+    // const audioBtn = document.getElementById("audio-btn");
+    const stopBtn = document.getElementById("stop-btn");
+    const themeBtn = document.getElementById("theme-btn");
+
+    //根据用户输入，自动调整宽度
+    const message = document.getElementById('message');
+
+    message.addEventListener('input', () => {
+      message.style.height = 'auto';
+      message.style.height = message.scrollHeight + 'px';
+    });
+
+    message.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+        message.value += '\n';
+        message.style.height = 'auto';
+        message.style.height = message.scrollHeight + 'px';
+      }
+    });
+
+    //拼接提问的所有问题
+    let jsonArrayString;
+    let jsonStr;
+    const allStr = "";
+
+    // 定义一个数组用于保存取消函数
+    let cancelFuncs = [];
+    //发送文本
+    // 点击发送按钮时向服务器发送消息
+    //添加一个标志位，判断是否点击了按钮
+    let flag = 0;
+
+    //======================================分割线========================================
+    //停止发送
+    stopBtn.addEventListener("click", () => {
+      // 取消请求的按钮
+      // 循环遍历所有的取消函数，执行取消操作
+      for (let cancelFunc of cancelFuncs) {
+        cancelFunc('请求被取消');
+      }
+      // 清空取消函数数组
+      cancelFuncs = [];
+    });
+
+    //======================================分割线========================================
+    //处理函数
+    function sendMessage() {
+      //发送后恢复原来的高度
+      const messages = document.getElementById('message');
+      //////发送后恢复原始样式
+      messages.style.height = 44 + 'px';
+
+      let message = messageInput.value;
+      if (message.length == 0) {
+        alert("你还什么都没说呢~~~")
+        return;
+      }
+      const Question = message;
+      // //拼接提问题的字符串
+      // jsonStr = Question;
+      // allStr.push(jsonStr);
+      // //转为json格式
+      // jsonArrayString = JSON.stringify(allStr);
+      messageInput.value = "";//表单框置空
+
+      //// 禁用输入框
+      const inputMes = document.getElementById("message");
+      inputMes.disabled = false;
+      // 添加禁止输入的样式
+      inputMes.classList.add("disabled");
+      // 设置输入框的 placeholder
+      inputMes.placeholder = "正在处理请求，请稍候...";
+      const messageEl = document.createElement("p");
+      //
+
+      //标志位自增
+      flag++;
+      axios({
+        //请求方法
+        method: 'POST',
+        //请求URL
+        url: 'https://goapi.eu.org:50605/api/administrator',//API，本地测试要写成 http://127.0.0.1:80/api/administrator
+
+        //保存取消请求函数
+        cancelToken: new axios.CancelToken(function executor(c) {
+          // 将取消函数保存到数组中
+          cancelFuncs.push(c);
+        })
+      }).then(response => {
+        const data = response.data;
+        // alert(data.message + data.newURL);
+        const text = data.message + "！！！\n温馨提示: 点击直链下载即可下载文件: ";
+        const delay = 13; // 每个字符之间的延迟时间（以毫秒为单位）
+        //每次回答问题换一种颜色
+        const red = Math.floor(Math.random() * 256);
+        const green = Math.floor(Math.random() * 256);
+        const blue = Math.floor(Math.random() * 256);
+        messageEl.style.color = `rgb(${red}, ${green}, ${blue})`;
+
+        messageEl.textContent = "问: " + Question;
+        for (let i = 0; i < text.length; i++) {
+          setTimeout(() => {//网页动态生成
+            messageEl.textContent += text.charAt(i);
+          }, i * delay);
+        }
+        //解除禁止框
+        inputMes.disabled = false;
+        inputMes.classList.remove("disabled");
+        // 清空输入框的 placeholder
+        inputMes.placeholder = "";
+        messageEl.textContent += "\n";
+        chatbox.appendChild(messageEl);
+
+        if (flag >= 5) {//5次后清空网页
+          flag = 0;
+          const messageDEL = chatbox.querySelectorAll("p");
+          let i = 0;
+          while (i < messageDEL.length - 1) {
+            chatbox.removeChild(messageDEL[i]);
+            i++;
+          }
+          return;
+        }
+
+      })
+        .catch(error => {
+          //console.error('Error:', error);
+          messageEl.textContent = error;
+          chatbox.appendChild(messageEl);
+          //解除禁止框
+          inputMes.disabled = false;
+          inputMes.classList.remove("disabled");
+          // 清空输入框的 placeholder
+          inputMes.placeholder = "";
+        });
+
+    }
+
+    sendBtn.addEventListener("click", sendMessage);//按钮绑定监听事件
+    //按下回车键，同样执行
+    messageInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" && event.ctrlKey) {
+        sendMessage();
+      }
+    });
+
+
+    //=============================分割线===============================
+    // 点击发送按钮时向服务器发送消息
+    //添加一个标志位，判断是否点击了按钮
+    let flag1 = 0;
+    downloadBtn.addEventListener("click", () => {
+
+
+      //
+      let message = messageInput.value;
+      messageInput.value = "";//表单框置空
+
+      //// 禁用输入框
+      const inputMes = document.getElementById("message");
+      inputMes.disabled = false;
+      // 添加禁止输入的样式
+      inputMes.classList.add("disabled");
+      // 设置输入框的 placeholder
+      inputMes.placeholder = "正在处理请求，请稍候...";
+      const messageEl = document.createElement("p");
+
+      //////////////////
+
+
+      //标志位自增
+      flag1++;
+      axios({
+        //请求方法
+        method: 'POST',
+        //请求URL
+        url: 'https://goapi.eu.org:50605/api/addLink',//API，本地测试要写成 http://127.0.0.1:80/api/addLink
+
+        //保存取消请求函数
+        cancelToken: new axios.CancelToken(function executor(c) {
+          // 将取消函数保存到数组中
+          cancelFuncs.push(c);
+        })
+      }).then(response => {
+        const data = response.data;
+
+
+        //下载文件请求
+        const UrlLink = response.data.newURL;
+
+        // 创建一个带有下载属性的<a>元素
+        const downloadLink = document.createElement('a');
+        downloadLink.href = UrlLink;
+        // downloadLink.download = 'file.exe'; // 设置下载文件的名称？
+        // alert(UrlLink);
+
+        // 模拟点击下载链接
+        downloadLink.click();
+
+
+        // alert(data.message + data.newURL);
+        const text = data.message + "！！！\n下载直链: " + data.newURL;
+        const delay = 13; // 每个字符之间的延迟时间（以毫秒为单位）
+        //每次回答问题换一种颜色
+        const red = Math.floor(Math.random() * 256);
+        const green = Math.floor(Math.random() * 256);
+        const blue = Math.floor(Math.random() * 256);
+        messageEl.style.color = `rgb(${red}, ${green}, ${blue})`;
+
+        messageEl.textContent = "";
+        for (let i = 0; i < text.length; i++) {
+          setTimeout(() => {//网页动态生成
+            messageEl.textContent += text.charAt(i);
+          }, i * delay);
+        }
+        //解除禁止框
+        inputMes.disabled = false;
+        inputMes.classList.remove("disabled");
+        // 清空输入框的 placeholder
+        inputMes.placeholder = "";
+        messageEl.textContent += "\n";
+        chatbox.appendChild(messageEl);
+
+        if (flag >= 5) {//5次后清空网页
+          flag = 0;
+          const messageDEL = chatbox.querySelectorAll("p");
+          let i = 0;
+          while (i < messageDEL.length - 1) {
+            chatbox.removeChild(messageDEL[i]);
+            i++;
+          }
+          return;
+        }
+
+      })
+        .catch(error => {
+          //console.error('Error:', error);
+          messageEl.textContent = error;
+          chatbox.appendChild(messageEl);
+          //解除禁止框
+          inputMes.disabled = false;
+          inputMes.classList.remove("disabled");
+          // 清空输入框的 placeholder
+          inputMes.placeholder = "";
+        });
+
+
+
+    });
+
+
+    //===================================分割线=================================
+    //换主题
+    let isBlack = false;
+    themeBtn.addEventListener("click", () => {
+      if (isBlack) {
+        chatbox.style.backgroundColor = "";
+        isBlack = false;
+      } else {
+        chatbox.style.backgroundColor = "black";
+        isBlack = true;
+      }
+
+
+    });
+  </script>
+</body>
+
+</html>

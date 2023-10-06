@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>调用后端 API 的示例</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <button onclick="sendGetRequest()">查看所有用户 请求</button>
+  <div id="url"></div>
+  <script>
+    function sendGetRequest(){
+    // 使用 Axios 发送 GET 请求
+    axios.get('http://127.0.0.1/api/get')
+      .then(function (response) {
+        // 将响应数据渲染到页面中
+        var url = response.data.data;
+        //console.log(response.data.data[0])
+        var urlDiv = document.getElementById('url');
+        urlDiv.innerHTML = '<ul>';
+        for (var i = 0; i < url.length; i++) {
+          urlDiv.innerHTML += '<li>' + "url链接 " + url[i].id + '</li>';
+          urlDiv.innerHTML += '<li>' + "软件名称: " + url[i].urlname + '</li>';
+          urlDiv.innerHTML += '<li>' + "url: " + url[i].url + '</li>';
+          urlDiv.innerHTML += '<li>' + "=========" + '</li>';
+        }
+        urlDiv.innerHTML += '</ul>';
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }
+  </script>
+</body>
+</html>

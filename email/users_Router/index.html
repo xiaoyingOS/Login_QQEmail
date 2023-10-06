@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>Login Page</title>
+    <style>
+      body {
+        background-color: rgb(255, 0, 0);
+        
+      } 
+      
+      #login-page {
+        width: 600px;
+        height: 333px;
+        border: 2px solid green;
+        margin: 0 auto;
+        margin-top: 100px;
+        display: block;
+      }
+      
+      #menu-page {
+        width: 999px;
+        height: 666px;
+        border: 2px solid rgb(0, 0, 0);
+        margin: 0 auto;
+        margin-top: 100px;
+        display: none;
+		background-color: rgb(255, 255, 255);
+      }
+      
+      #menu-page ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        margin-top: 100px;
+      }
+      
+      #menu-page li {
+        /* display: inline-block; */
+        padding: 20px;
+        border: 1px solid black;
+        cursor: pointer;
+        margin: 0px auto;
+      }
+      
+      #menu-page li:hover,
+      #menu-page li.selected {
+        background-color: #e0e0e0;
+      }
+      
+      #error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 10px;
+      }
+
+	  body {
+  background-color: grey;
+  
+}
+
+/* #login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+} */
+
+#login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+#login-form label {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+#login-form input[type="email"],
+#login-form input[type="password"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  font-size: 1.2rem;
+}
+
+#login-form input[type="submit"] {
+  padding: 0.5rem;
+  border-radius: 3px;
+  border: none;
+  font-size: 1.2rem;
+  background-color: #2196f3;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+#login-form input[type="submit"]:hover {
+  transform: translateY(-3px);
+  background-color: #ff0000;
+}
+
+#error-message {
+  color: red;
+  margin-bottom: 1rem;
+}
+
+/* #menu-page {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+} */
+
+.menu-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 100px;
+  margin: 1rem;
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.menu-item:hover {
+  transform: translateY(-3px);
+  background-color: #ff0000;
+}
+
+.selected {
+  background-color: #2196f3;
+  color: white;
+}
+
+    </style>
+  </head>
+  <body>
+    <div id="login-page">
+      <form id="login-form" style="background-color: #ffffff;">
+        <label for="email" style="color: #ff0000; font-size: 33px;">Email:</label>
+        <input type="email" id="email" name="email" value="" style="color: #ff0000; font-size: 33px; background-color: #ceff7e;" required>
+        <br><br>
+        <label for="password" style="color: #ff0000; font-size: 33px;">Password:</label>
+        <input type="password" id="password" name="password" value="" style="color: #ff0000; font-size: 33px; background-color: black;" required>
+        <br><br>
+        <input type="submit" value="Log In">
+      </form>
+      <div id="error-message" style="color: blue; font-size: 50px;"></div>
+    </div>
+    <div id="menu-page">
+      <ul>
+        <!-- <li id="ts">Ts</li>
+        <li id="java">Java</li>
+        <li id="go">Go</li> -->
+      </ul>
+    </div>
+    <script>
+      var loginForm = document.getElementById("login-form");
+      var errorDiv = document.getElementById("error-message");
+      var loginPage = document.getElementById("login-page");
+      var menuPage = document.getElementById("menu-page");
+      // var tsMenu = document.getElementById("ts");
+      // var javaMenu = document.getElementById("java");
+      // var goMenu = document.getElementById("go");
+      
+      loginForm.addEventListener("submit", function(event) {
+        event.preventDefault();        
+        var email = loginForm.email.value;
+        var password = loginForm.password.value; 
+    ///
+        // function sendGetRequest(){
+    // 使用 Axios 发送 GET 请求
+    const data = {email,password}
+
+    axios.post('http://127.0.0.1:80/api/login', data)
+    .then(function (response) {
+        // 将响应数据渲染到页面中
+        //alert(response.data.status);//0
+         
+        if (response.data.status === 0) {
+          errorDiv.textContent = "";
+          loginPage.style.display = "none";
+          menuPage.style.display = "block";
+
+          //menuPage.innerHTML = "渲染页面";
+
+    axios.get('http://127.0.0.1:80/api/dbUrl')
+      .then(function (response) {
+        // 将响应数据渲染到页面中
+        var urls = response.data.data;
+        //console.log(response.data.data[0])
+        // var usersDiv = document.getElementById('urls');
+        // usersDiv.innerHTML = '<ul>';
+          /*
+        for (var i = 0; i < urls.length; i++) {
+          menuPage.innerHTML += '<li>' + "软件名称: " + urls[i].urlname + '</li>';
+          menuPage.innerHTML += '<li>' + "软件链接: " + urls[i].url + '</li>';
+          menuPage.innerHTML += '<br>';
+        }
+        //usersDiv.innerHTML += '</ul>';
+        */
+        window.location.href = './test.html';
+
+        //////////
+        menuPage.style.color = "blue";
+      }).catch(function (error) {
+        console.log(error);
+      });
+
+      } else if(response.data.status === 3){
+        //倒计时，60秒发来
+        let second = 60;
+        //超过60秒token生效
+        //注册用户
+        errorDiv.textContent = "";
+        loginPage.style.display = "none";
+        menuPage.style.display = "block";
+        menuPage.innerHTML += '<form id="form">' + '<label for="email2">' + '请输入邮箱：' + '</label>' + 
+        '<input type="email2" id="email2" name="email2" required>' + '<br><br>' +
+        '<label for="password2">' + '请输入密码：' + '</label>' +
+        '<input type="password2" id="password2" name="password2" required>' + '<br><br>'+
+        '<label for="yzm">' + '请输入验证码：' + '</label>' +
+        '<input type="yzm" id="yzm" name="yzm" required>'  + '<span id="span">' + '</span>' + '<br><br>' +
+      '<button id="btn" type="button" onclick="sendCode()">发送验证码</button>' + '<br><br>'+ 
+      '<button id="btn2" type="button" onclick="signUp()">注 册</button>' + 
+      '</form>';
+
+      //
+      email2 = document.getElementById("email2");
+      password2 = document.getElementById("password2");
+      email2.value = email;
+      password2.value = password;
+
+      let element = document.getElementById("form");
+          element.style.marginLeft = "300px";
+          element.style.marginRight = "auto";
+      let element2 = document.getElementById("btn");
+          element2.style.marginLeft = "313px";
+          element2.style.marginRight = "auto";
+
+      let btn3 = document.getElementById("btn2");
+          btn3.style.marginLeft = "111px";
+          btn3.style.marginRight = "auto";
+          btn3.style.color = "blank";
+          btn3.style.fontSize = "33px";
+          btn3.style.width = "133px";
+          btn3.style.height = "69px";
+          btn3.style.backgroundColor = "rgb(23,203,26)"
+      
+          // 获取按钮元素
+    const btn = document.getElementById('btn');
+          btn.style.width = "100px";
+          btn.style.height = "50px";
+
+    // 添加事件监听器
+    btn.addEventListener('click', sendCode);
+    btn3.addEventListener('click', signUp);//注册
+
+    let timer;
+      //发送请求
+      function sendCode() {
+        //修改emial 和 password的值
+        email2.value = email2.value;
+        password2.value = password2.value;
+
+        //倒计时
+        let span = document.getElementById("span");
+        span.style.fontSize = "23px";
+        //关闭定时器
+        clearInterval(timer);
+        timer = setInterval(function(){
+					span.innerHTML = " " + second-- + "s" + "<br><br>" + "验证码已发送，注意查收";
+					//num等于11是就关闭定时器
+					if(second <= 0){
+						clearInterval(timer);
+            span.style.color = "green"
+            span.innerHTML = " 没有收到验证码，重新发送";
+            second = 60;
+					}
+					
+				},1000);//就相当于放慢速度的for循环。1000ms就是1s
+
+      let email = email2.value;
+      let password = password2.value;
+
+      if (!email) {
+      alert("请输入邮箱地址！");
+      //关闭定时器
+      clearInterval(timer);
+      return;
+      }
+
+      //正则表达式
+      //判断邮箱是否合法
+      // 创建一个正则表达式
+      let regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (regexEmail.test(email)) {
+        
+      } else {
+        alert("Email: " + email + " " + " 电子邮件地址 不合法");
+        //关闭定时器
+        clearInterval(timer);
+        return;
+        }
+
+      //判断密码
+      const regexPassword2 = /^[^\u4e00-\u9fa5]+$/;
+      if (regexPassword2.test(password)) {
+
+      } else {
+        alert("温馨提示: 密码不能为中文，必须修改为 正确的格式和才能注册成功");
+      }
+
+    axios({
+    //请求方法
+    method:'POST',
+    //请求URL
+    url:'http://127.0.0.1:80/api/sendCode',
+    //请求体参数
+    data: {
+        'email': email,
+        
+    }
+}).then(response => {
+      const data = response.data;
+      if (data.success) {
+        alert("验证码已发送，请注意查收！");
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("验证码发送失败，请更改密码格式稍后再试！");
+    });
+
+}
+    //注册
+    function signUp(){
+      let email = email2.value;
+      let password = password2.value;
+      let yzm = document.getElementById("yzm").value;
+
+      if (!email) {
+      alert("请输入邮箱地址！");
+      return;
+      }
+      if (!password) {
+        alert("请输入密码！");
+        return;
+    }
+    if (!yzm) {
+      alert("请输入验证码！");
+      return;
+    }
+
+    //正则表达式
+    //判断邮箱是否合法
+    // 创建一个正则表达式
+    let regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (regexEmail.test(email)) {
+      
+    } else {
+      alert("Email: " + email + " " + " 电子邮件地址 不合法");
+      return;
+      }
+
+    //判断密码
+    const regexPassword = /^[^\u4e00-\u9fa5]+$/;
+    if (regexPassword.test(password)) {
+      
+    } else {
+      alert("PassWord: " + password + " " + "密码 不合法");
+      return;
+    }
+
+    //判断验证码
+    const regexYzm = /^[0-9]+$/;
+    if (regexYzm.test(yzm)) {
+      
+    } else {
+      alert("验证码: " + yzm + " " + "验证码 不合法");
+      return;
+    }
+    
+    //点击注册按钮，判断用户 邮箱，密码，验证码是否都输入，并且判断验证码必须正确
+
+    // 发送邮箱地址到后端
+    axios({
+    //请求方法
+    method:'POST',
+    //请求URL
+    url:'http://127.0.0.1:80/api/signUp',
+    //请求体参数
+    data: {
+        'email': email,
+        'password': password,
+        'yzm': yzm
+        
+    }
+}).then(response => {
+      const data = response.data;
+      if (data.success) {
+
+        // 路径不对哦
+        window.location.href = '../public/logined.html';
+         alert("注册成功");//注册
+
+         //默认页面,一个新的页面
+
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // alert("注册失败，请稍后再试！");
+    });
+
+    }
+
+  }else{
+        errorDiv.textContent = ">>>密码错误<<<";
+      }
+        }
+
+        ///
+
+      );
+    //}
+      });
+
+</script>
+
+  </body>
+</html>

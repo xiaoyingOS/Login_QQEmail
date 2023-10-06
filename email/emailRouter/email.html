@@ -1,0 +1,94 @@
+<!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+
+
+<!-- <form>
+    <label for="email">请输入邮箱地址：</label>
+    <input type="email" id="email" name="email" required>
+    <button type="button" onclick="sendCode()">发送验证码</button>
+  </form>
+  
+  <script>
+  function sendCode() {
+    var email = document.getElementById("email").value;
+    if (!email) {
+      alert("请输入邮箱地址！");
+      return;
+    }
+    // 发送邮箱地址到后端
+    axios.post('/sendCode', { email: email })
+    .then(response => {
+      const data = response.data;
+      alert(data);
+
+      if (data.success) {
+        alert("验证码已发送，请注意查收！");
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("验证码发送失败，请稍后再试！");
+    });
+  }
+  </script> -->
+  
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>发送注册验证码</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <form>
+      <label for="email">请输入邮箱地址：</label>
+      <input type="email" id="email" name="email" required>
+      <button type="button" onclick="sendCode()">发送验证码</button>
+    </form>
+    <script>
+      function sendCode() {
+      let email = document.getElementById("email").value;
+      if (!email) {
+      alert("请输入邮箱地址！");
+      return;
+    }
+    // 发送邮箱地址到后端
+    axios({
+    //请求方法
+    method:'POST',
+    //请求URL
+    url:'http://127.0.0.1/sendCode',
+    //请求体参数
+    data: {
+        'email': email
+    }
+}).then(response => {
+      const data = response.data;
+      if (data.success) {
+        alert("验证码已发送，请注意查收！");
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("验证码发送失败，请稍后再试！");
+    });
+
+
+// axios({
+//         //请求方法
+//         method:'POST',
+//         //请求URL
+//         url:'http://127.0.0.1/sendCode',
+//         data : {'email': email}
+//         }).then(response=>{
+                
+//       })
+
+}
+
+  </script>
+  </body>
+</html>
